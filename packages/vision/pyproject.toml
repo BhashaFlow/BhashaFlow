@@ -1,9 +1,12 @@
 [project]
 name = "bhashaflow-vision"
-version = "0.1.0"
-description = "Screen-understanding track for BhashaFlow."
+version = "0.2.0"
+description = "Screen capture and UI grounding for BhashaFlow."
 requires-python = ">=3.12,<3.13"
-dependencies = ["bhashaflow-shared"]
+dependencies = [
+  "bhashaflow-shared",
+  "mss>=10.2.0",
+]
 
 [tool.uv.sources]
 bhashaflow-shared = { workspace = true }
