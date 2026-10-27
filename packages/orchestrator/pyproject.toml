@@ -1,0 +1,21 @@
+[project]
+name = "bhashaflow-orchestrator"
+version = "0.1.0"
+description = "Track coordination placeholder for BhashaFlow."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "bhashaflow-action",
+  "bhashaflow-audio",
+  "bhashaflow-shared",
+  "bhashaflow-vision",
+]
+
+[tool.uv.sources]
+bhashaflow-action = { workspace = true }
+bhashaflow-audio = { workspace = true }
+bhashaflow-shared = { workspace = true }
+bhashaflow-vision = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

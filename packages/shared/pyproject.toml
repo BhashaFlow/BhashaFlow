@@ -1,0 +1,10 @@
+[project]
+name = "bhashaflow-shared"
+version = "0.1.0"
+description = "Shared track identifiers for BhashaFlow."
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

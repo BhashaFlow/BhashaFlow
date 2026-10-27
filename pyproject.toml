@@ -1,0 +1,41 @@
+[project]
+name = "bhashaflow"
+version = "0.1.0"
+description = "Voice-first desktop agent workspace for the BhashaFlow hackathon demo."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = ["bhashaflow-orchestrator"]
+
+[tool.uv]
+package = false
+required-version = "==0.13.5"
+
+[tool.uv.sources]
+bhashaflow-orchestrator = { workspace = true }
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "ruff>=0.8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["packages"]
+addopts = "-q --import-mode=importlib"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = [
+  "packages/action/src",
+  "packages/audio/src",
+  "packages/orchestrator/src",
+  "packages/shared/src",
+  "packages/vision/src",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
