@@ -46,8 +46,13 @@ class VisionSession:
         self._thread: threading.Thread | None = None
 
     @classmethod
-    def for_demo_script(cls, *, interval_ms: int = CAPTURE_INTERVAL_MS) -> "VisionSession":
-        return cls(FixtureCapture(demo_scenes()), FixtureAttention(), interval_ms=interval_ms)
+    def for_demo_script(
+        cls,
+        *,
+        interval_ms: int = CAPTURE_INTERVAL_MS,
+        model: AttentionModel | None = None,
+    ) -> "VisionSession":
+        return cls(FixtureCapture(demo_scenes()), model, interval_ms=interval_ms)
 
     @property
     def interval_ms(self) -> int:

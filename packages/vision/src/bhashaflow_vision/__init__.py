@@ -12,7 +12,7 @@ from bhashaflow_vision.overlay import GroundingOverlay, overlay_from_env
 from bhashaflow_vision.session import VisionSession, open_session
 from bhashaflow_vision.types import GroundingEvent, GroundingResult, GroundingStatus
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 TRACK = "vision"
 

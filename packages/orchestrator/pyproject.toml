@@ -1,7 +1,7 @@
 [project]
 name = "bhashaflow-orchestrator"
-version = "0.1.0"
-description = "Track coordination placeholder for BhashaFlow."
+version = "0.2.0"
+description = "Planner loop for BhashaFlow vision, audio, and action."
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "bhashaflow-action",

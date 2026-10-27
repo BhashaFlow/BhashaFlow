@@ -63,7 +63,7 @@ requires-dist = [{ name = "bhashaflow-shared", editable = "packages/shared" }]
 
 [[package]]
 name = "bhashaflow-orchestrator"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "packages/orchestrator" }
 dependencies = [
     { name = "bhashaflow-action" },
@@ -87,7 +87,7 @@ source = { editable = "packages/shared" }
 
 [[package]]
 name = "bhashaflow-vision"
-version = "0.4.0"
+version = "0.5.0"
 source = { editable = "packages/vision" }
 dependencies = [
     { name = "bhashaflow-shared" },
