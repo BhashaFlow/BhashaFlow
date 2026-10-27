@@ -3,7 +3,7 @@
 import time
 from typing import Protocol
 
-from bhashaflow_audio.fixtures import Clip, canonical_clips
+from bhashaflow_audio.fixtures import CANONICAL_UTTERANCES, CONTROL_UTTERANCES, Clip, make_clip
 from bhashaflow_audio.types import Transcript
 
 
@@ -25,7 +25,11 @@ class FixtureTranscriber:
     model = "fixture"
 
     def __init__(self, clips: tuple[Clip, ...] | None = None) -> None:
-        chosen = canonical_clips() if clips is None else clips
+        if clips is None:
+            lines = (*CONTROL_UTTERANCES, *CANONICAL_UTTERANCES)
+            chosen = tuple(make_clip(text) for text in lines)
+        else:
+            chosen = clips
         self._by_audio = {clip.speech: clip.transcript for clip in chosen}
 
     def transcribe(self, audio: bytes, sample_rate: int) -> Transcript:

@@ -130,6 +130,16 @@ Muse has no TTS model. Confirmations use `BHASHAFLOW_TTS_BACKEND`: `status` (def
 
 Quiet ambient noise stays under the energy gate. Speech during a held confirmation cancels it (barge-in, best effort).
 
+## Voice control
+
+The control plane is voice-first. It stays idle until it hears `bhashaflow start` (or `bhashaflow`, `start`, `start listening`). It then accepts the demo lines and stops on `stop`, `abort`, or `cancel`. Indicators are the words `listening`, `thinking`, `acting`, and `confirming`. They are log lines, and an optional `BHASHAFLOW_STATUS_FILE`, not a window. Confirmations are short status lines through the TTS interface, so the desktop keeps focus.
+
+```bash
+uv run python -m bhashaflow_audio.control
+```
+
+That recording is wake, the four demo lines, and stop. It does not read the keyboard. The acting step is a stub until the action track is wired. Details are in [docs/voice-control.md](docs/voice-control.md).
+
 ## OS permissions
 
 Fixture capture, tests, and CI do not record the screen, read the microphone, or inject input. Desktop capture needs screen recording on the demo machine. Clicking and typing are not implemented; the action track will need accessibility access when it lands.

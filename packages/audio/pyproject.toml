@@ -1,6 +1,6 @@
 [project]
 name = "bhashaflow-audio"
-version = "0.2.0"
+version = "0.3.0"
 description = "Audio capture and speech track for BhashaFlow."
 requires-python = ">=3.12,<3.13"
 dependencies = ["bhashaflow-shared"]
