@@ -1,0 +1,13 @@
+[project]
+name = "bhashaflow-audio"
+version = "0.1.0"
+description = "Audio capture and speech track for BhashaFlow."
+requires-python = ">=3.12,<3.13"
+dependencies = ["bhashaflow-shared"]
+
+[tool.uv.sources]
+bhashaflow-shared = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
