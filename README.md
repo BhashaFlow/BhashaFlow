@@ -34,7 +34,17 @@ Install uv 0.13.5, then sync the workspace. The spoken demo runs in fixture mode
 uv run bhashaflow-demo
 ```
 
-That plays wake, the four demo lines, and stop, and prints the stage log (`listen`, `ground`, `act`, `confirm`, `next`). The first click misses once and the loop says `Trying that again`, then finishes with `recoveries=1`. `--no-recover` skips that beat. It does not read `.env` and it does not call Muse. Permissions, env vars, warm-up, and the ML / Audio / Arch checklist are in [docs/demo-runbook.md](docs/demo-runbook.md). The single-user live command is `uv run bhashaflow`, documented in [docs/production.md](docs/production.md). The audio fixture path prints the four lines on their own:
+That plays wake, the four demo lines, and stop, and prints the stage log (`listen`, `ground`, `act`, `confirm`, `next`). The first click misses once and the loop says `Trying that again`, then finishes with `recoveries=1`. `--no-recover` skips that beat. It does not read `.env` and it does not call Muse. Permissions, env vars, warm-up, and the ML / Audio / Arch checklist are in [docs/demo-runbook.md](docs/demo-runbook.md). The single-user live command is `uv run bhashaflow`, documented in [docs/production.md](docs/production.md).
+
+The same workspace serves the local UI API on `127.0.0.1:8000`. It stays in standalone mock mode: no model API key, and no OS input. `python main.py` starts that same process.
+
+```bash
+uv run bhashaflow-server
+```
+
+`GET /api/health` reports the process is up. `POST /api/run-workflow` with `{"command": "open notepad"}` returns a deterministic notepad plan (`"status": "simulated"`). `"execute_os": true` marks that plan executed in-process and does not launch an app. A `ui/` directory, when present, is mounted at `/ui`, and `/` returns `ui/index.html`.
+
+The audio fixture path prints the four lines on their own:
 
 ```bash
 uv run python -m bhashaflow_audio
