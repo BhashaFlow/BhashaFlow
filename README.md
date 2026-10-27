@@ -32,7 +32,7 @@ Install uv 0.13.5, then sync the workspace. The spoken demo runs in fixture mode
 uv run bhashaflow-demo
 ```
 
-That plays wake, the four demo lines, and stop, and prints the stage log (`listen`, `ground`, `act`, `confirm`, `next`). The audio fixture path prints the four lines on their own:
+That plays wake, the four demo lines, and stop, and prints the stage log (`listen`, `ground`, `act`, `confirm`, `next`). The first click misses once and the loop says `Trying that again`, then finishes with `recoveries=1`. `--no-recover` skips that beat. Permissions, env vars, warm-up, and the ML / Audio / Arch checklist are in [docs/demo-runbook.md](docs/demo-runbook.md). The audio fixture path prints the four lines on their own:
 
 ```bash
 uv run python -m bhashaflow_audio

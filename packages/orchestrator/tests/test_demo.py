@@ -56,12 +56,41 @@ def test_a_recoverable_click_is_retried_once() -> None:
     assert loop._actions.clicks[0] == "report.pdf"
 
 
-def test_cli_prints_the_stage_log(capsys: pytest.CaptureFixture[str]) -> None:
+def test_cli_prints_the_stage_log_and_recovers_once(capsys: pytest.CaptureFixture[str]) -> None:
     assert main([]) == 0
     output = capsys.readouterr().out
     assert "phase=done" in output
     assert "ok=true" in output
     assert "steps=4" in output
+    assert "recoveries=1" in output
+    assert 'text="Trying that again"' in output
+    assert "focus_stolen=false" in output
+
+
+def test_no_recover_runs_the_clean_script(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["--no-recover"]) == 0
+    output = capsys.readouterr().out
+    assert "recoveries=0" in output
+    assert "ok=true" in output
+
+
+def test_mic_without_a_key_does_not_start(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    for name in ("MODEL_API_KEY", "BHASHAFLOW_MUSE_API_KEY", "BHASHAFLOW_STT_API_KEY"):
+        monkeypatch.delenv(name, raising=False)
+    assert main(["--mic"]) == 2
+    assert "MODEL_API_KEY" in capsys.readouterr().err
+
+
+def test_desktop_build_does_not_inject(monkeypatch: pytest.MonkeyPatch) -> None:
+    from bhashaflow_action.desktop import DesktopActionEngine
+    from bhashaflow_orchestrator.cli import build_demo
+
+    monkeypatch.delenv("BHASHAFLOW_ACTIONS", raising=False)
+    loop = build_demo(desktop=True)
+    assert isinstance(loop._actions, DesktopActionEngine)
 
 
 def test_muse_planner_flag_refuses_to_run_without_a_key(

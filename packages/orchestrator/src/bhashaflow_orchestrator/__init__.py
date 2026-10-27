@@ -11,7 +11,7 @@ from bhashaflow_orchestrator.loop import PlannerLoop, PlanStep, open_planner
 from bhashaflow_shared import TRACKS
 from bhashaflow_vision import TRACK as VISION_TRACK
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 TRACK = "orchestrator"
 

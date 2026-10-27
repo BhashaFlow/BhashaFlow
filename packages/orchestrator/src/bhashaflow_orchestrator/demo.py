@@ -6,6 +6,7 @@ stays on the fixture engine unless the caller passes another engine.
 """
 
 from bhashaflow_action import DEMO_RECIPIENT, FixtureActionEngine, perform
+from bhashaflow_action.desktop import DesktopActionEngine
 from bhashaflow_action.engine import ActionResult
 from bhashaflow_audio.control import classify_utterance, confirmation_for
 from bhashaflow_audio.fixtures import CANONICAL_UTTERANCES, voice_script_clips
@@ -46,7 +47,7 @@ class DemoLoop:
     def __init__(
         self,
         planner: PlannerLoop,
-        actions: FixtureActionEngine,
+        actions: FixtureActionEngine | DesktopActionEngine,
         pipeline: AudioPipeline,
         tts: SpeechSynthesis,
         *,
