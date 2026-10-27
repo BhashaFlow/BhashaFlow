@@ -77,6 +77,12 @@ ChatGPT Voice with computer use is the comparison for this script. Its observe s
 | Capture interval | 100 ms (about 10 Hz), off the planner's critical path |
 | Grounding | 150 ms |
 | Vision step, frame already buffered | 200 ms |
+| Planner step, no recovery | 250 ms |
+| Planner step with the one recovery | 450 ms |
+
+### Planner loop
+
+`PlannerLoop` in `bhashaflow-orchestrator` grounds one utterance, maps it to a click or type target, and re-grounds once when vision returns a recoverable miss and the utterance has a sharper clause. The model, the prompt (including the 40-token tail truncation), and the latency assumptions are in [docs/planner-loop.md](docs/planner-loop.md). CI runs the fixture heuristic. `BHASHAFLOW_VISION_ENDPOINT` selects an HTTP model when it is an http(s) URL; leave it empty for local and CI runs. The loop does not send OS input.
 
 ### Planner use
 
@@ -120,7 +126,7 @@ Placeholders live in [`.env.example`](.env.example):
 - `BHASHAFLOW_CAPTURE` — `fixture` (default) or `desktop`
 - `BHASHAFLOW_OVERLAY` — `1` (default) draws the side panel, `0` hides it
 - `BHASHAFLOW_STT_API_KEY` and `BHASHAFLOW_TTS_API_KEY` — audio track
-- `BHASHAFLOW_VISION_ENDPOINT` — reserved for a future attention model; unused
+- `BHASHAFLOW_VISION_ENDPOINT` — optional http(s) attention model; empty uses the fixture heuristic
 
 Leave keys empty until the track that reads them exists. Do not commit real credentials.
 
