@@ -1,6 +1,6 @@
 # BhashaFlow
 
-BhashaFlow is a hackathon project for a voice-first desktop demo. You speak a task, and three tracks — vision, audio, and action — are coordinated by an orchestrator so the demo can listen, look at the screen, and carry the task out on the machine. ChatGPT Voice with computer use already pairs speech with computer control, and Claude is the typed-assistant comparison. This repository is the shared workspace for one continuous spoken desktop session over a short build. Action and the orchestrator are still placeholders. The audio package turns fixture clips (or a microphone) into end-of-utterance transcripts. The vision package publishes screen frames and grounds the demo script through a fixture attention model.
+BhashaFlow is a hackathon project for a voice-first desktop demo. You speak a task, and three tracks — vision, audio, and action — are coordinated by an orchestrator so the demo can listen, look at the screen, and carry the task out on the machine. ChatGPT Voice with computer use already pairs speech with computer control, and Claude is the typed-assistant comparison. This repository is the shared workspace for one continuous spoken desktop session over a short build. The orchestrator is still a planner loop; it does not yet run the spoken script. The audio package turns fixture clips (or a microphone) into end-of-utterance transcripts. The action package can click, type, focus, and open the demo apps. The vision package publishes screen frames and grounds the demo script through a fixture attention model.
 
 ## Stack
 
@@ -18,7 +18,7 @@ Runtime pins:
 | --- | --- | --- |
 | `packages/vision` | Lungile | Screen capture and UI grounding |
 | `packages/audio` | Alucard | Capture, speech-to-text, speech synthesis |
-| `packages/action` | Satinder | Pointer handoff for clicks and typing. No OS input yet. |
+| `packages/action` | Satinder | Allowlisted click, type, focus, and open-app. Fixture by default. |
 | `packages/orchestrator` | Satinder | Coordination of the other tracks |
 | `packages/shared` | All | Identifiers shared by the tracks |
 
@@ -138,15 +138,19 @@ The control plane is voice-first. It stays idle until it hears `bhashaflow start
 uv run python -m bhashaflow_audio.control
 ```
 
-That recording is wake, the four demo lines, and stop. It does not read the keyboard. The acting step is a stub until the action track is wired. Details are in [docs/voice-control.md](docs/voice-control.md).
+That recording is wake, the four demo lines, and stop. It does not read the keyboard. The acting line in that trace is the voice stub. Click, type, focus, and open-app live in the action package. Details are in [docs/voice-control.md](docs/voice-control.md).
+
+## Action
+
+`bhashaflow-action` performs a pointer handoff. The default is `FixtureActionEngine`, which records open, focus, click, and type for the demo allowlist: Files, Preview, Sheets, and Mail. Anything else, including Terminal, is refused and is not recoverable. A click can fail once with `recoverable=true` so the loop can retry. Set `BHASHAFLOW_ACTIONS=desktop` to shell out to OS commands; leave it unset for CI. The permission model and the optional `muse-wonder-1.0` computer-use gate are in [docs/action-engine.md](docs/action-engine.md).
 
 ## OS permissions
 
-Fixture capture, tests, and CI do not record the screen, read the microphone, or inject input. Desktop capture needs screen recording on the demo machine. Clicking and typing are not implemented; the action track will need accessibility access when it lands.
+Fixture capture, tests, and CI do not record the screen, read the microphone, or inject input. Desktop capture needs screen recording on the demo machine. Fixture actions do not inject input either. `BHASHAFLOW_ACTIONS=desktop` needs accessibility access and still refuses apps outside the allowlist.
 
 - **Microphone** — voice input for the audio track.
 - **Screen recording** — desktop capture. On macOS this is Screen Recording. On Windows it is graphics capture. On Linux it is a portal (or X11 capture) under Wayland or X11.
-- **Accessibility** — future OS actions. On macOS this is Accessibility. On Windows it is UI Automation. On Linux it is an input and assistive-technology interface such as AT-SPI.
+- **Accessibility** — desktop actions when `BHASHAFLOW_ACTIONS=desktop`. On macOS this is Accessibility. On Windows it is UI Automation. On Linux it is an input and assistive-technology interface such as AT-SPI. Fixture actions do not need it.
 
 Grant those only to the demo process, in System Settings (macOS), Privacy settings (Windows), or the desktop portal (Linux). Do not grant them to editors or shells that are only running tests.
 
