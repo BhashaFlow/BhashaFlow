@@ -1,6 +1,6 @@
 [project]
 name = "bhashaflow-action"
-version = "0.2.0"
+version = "0.3.0"
 description = "Pointer handoff for BhashaFlow OS actions."
 requires-python = ">=3.12,<3.13"
 dependencies = [

@@ -3,7 +3,7 @@ from bhashaflow_shared import TRACKS
 
 
 def test_orchestrator_wires_the_other_tracks() -> None:
-    assert __version__ == "0.2.0"
+    assert __version__ == "0.4.0"
     assert TRACK == "orchestrator"
     assert coordinated_tracks() == ("vision", "audio", "action")
     assert registered()
