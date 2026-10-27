@@ -3,7 +3,10 @@ name = "bhashaflow-audio"
 version = "0.3.0"
 description = "Audio capture and speech track for BhashaFlow."
 requires-python = ">=3.12,<3.13"
-dependencies = ["bhashaflow-shared"]
+dependencies = [
+  "bhashaflow-shared",
+  "websocket-client>=1.8",
+]
 
 [tool.uv.sources]
 bhashaflow-shared = { workspace = true }

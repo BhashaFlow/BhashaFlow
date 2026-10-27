@@ -11,6 +11,8 @@ import json
 import os
 from collections.abc import Callable
 
+from bhashaflow_shared.retry import call_with_retries
+
 SAM_MODEL = "sam-3.1"
 SAM_URL = "https://api.meta.ai/v1/responses"
 
@@ -60,9 +62,18 @@ class SamRegion:
 
     model = SAM_MODEL
 
-    def __init__(self, api_key: str, *, transport: Transport | None = None) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        *,
+        transport: Transport | None = None,
+        retries: int = 0,
+        timeout_s: float = 5.0,
+    ) -> None:
         self._api_key = api_key
         self._transport = transport
+        self._retries = retries
+        self._timeout_s = timeout_s
 
     def boxes(self, prompt: str, image_data_url: str) -> tuple[tuple[int, int, int, int], ...]:
         if self._transport is None:
@@ -72,8 +83,13 @@ class SamRegion:
             "authorization": f"Bearer {self._api_key}",
             "content-type": "application/json",
         }
+
+        def attempt() -> dict[str, object]:
+            assert self._transport is not None
+            return self._transport(SAM_URL, body, headers, self._timeout_s)
+
         try:
-            parsed = self._transport(SAM_URL, body, headers, 5.0)
+            parsed = call_with_retries(attempt, retries=self._retries)
         except Exception:
             return ()
         return parse_sam_boxes(parsed)

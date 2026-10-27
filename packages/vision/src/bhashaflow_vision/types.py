@@ -50,6 +50,7 @@ class UiElement:
     bbox: BoundingBox
     accessibility_hint: str
     keywords: tuple[str, ...]
+    app: str = ""
 
     def __post_init__(self) -> None:
         if not self.name.strip():

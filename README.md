@@ -1,6 +1,8 @@
 # BhashaFlow
 
-BhashaFlow is a hackathon project for a voice-first desktop demo. You speak a task, and three tracks — vision, audio, and action — are coordinated by an orchestrator so the demo can listen, look at the screen, and carry the task out on the machine. ChatGPT Voice with computer use already pairs speech with computer control, and Claude is the typed-assistant comparison. This repository is the shared workspace for one continuous spoken desktop session over a short build. The audio package turns fixture clips (or a microphone) into end-of-utterance transcripts. The action package can click, type, focus, and open the demo apps. The orchestrator runs that path as one spoken script. The vision package publishes screen frames and grounds the demo script through a fixture attention model.
+BhashaFlow is a voice-first desktop agent for one person at a time. You speak a task, and three tracks — vision, audio, and action — are coordinated by an orchestrator so the process can listen, look at the screen, and carry the task out on that machine. The keyless path is still a fixture rehearsal. The live path is `uv run bhashaflow` (or `uv run bhashaflow-demo --live`) when a Muse key and OS permissions are present. It is not multi-tenant, not billed, and not a hosted computer-use service. What that command can and cannot do is in [docs/production.md](docs/production.md).
+
+ChatGPT Voice with computer use already pairs speech with computer control, and Claude is the typed-assistant comparison. The audio package turns fixture clips (or a microphone) into end-of-utterance transcripts. The action package can click, type, focus, and open the allowlisted apps. The orchestrator runs that path as one spoken session. The vision package publishes screen frames and grounds them.
 
 ## Stack
 
@@ -32,7 +34,7 @@ Install uv 0.13.5, then sync the workspace. The spoken demo runs in fixture mode
 uv run bhashaflow-demo
 ```
 
-That plays wake, the four demo lines, and stop, and prints the stage log (`listen`, `ground`, `act`, `confirm`, `next`). The first click misses once and the loop says `Trying that again`, then finishes with `recoveries=1`. `--no-recover` skips that beat. Permissions, env vars, warm-up, and the ML / Audio / Arch checklist are in [docs/demo-runbook.md](docs/demo-runbook.md).
+That plays wake, the four demo lines, and stop, and prints the stage log (`listen`, `ground`, `act`, `confirm`, `next`). The first click misses once and the loop says `Trying that again`, then finishes with `recoveries=1`. `--no-recover` skips that beat. It does not read `.env` and it does not call Muse. Permissions, env vars, warm-up, and the ML / Audio / Arch checklist are in [docs/demo-runbook.md](docs/demo-runbook.md). The single-user live command is `uv run bhashaflow`, documented in [docs/production.md](docs/production.md).
 
 The same workspace serves the local UI API on `127.0.0.1:8000`. It stays in standalone mock mode: no model API key, and no OS input. `python main.py` starts that same process.
 
@@ -56,7 +58,7 @@ cp .env.example .env
 uv run pytest
 ```
 
-`.env` is gitignored. Nothing loads that file automatically. `open_session()` reads `BHASHAFLOW_CAPTURE` from the process environment when you export it.
+`.env` is gitignored. `uv run bhashaflow` and `uv run bhashaflow-demo --live` load it and do not override variables you already exported. `uv run bhashaflow-demo` does not load it. `open_session()` reads `BHASHAFLOW_CAPTURE` from the process environment when you export it.
 
 ## CI locally
 
