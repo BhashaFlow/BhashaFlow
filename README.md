@@ -1,6 +1,6 @@
 # BhashaFlow
 
-BhashaFlow is a hackathon project for a voice-first desktop demo. You speak a task, and three tracks — vision, audio, and action — are coordinated by an orchestrator so the demo can listen, look at the screen, and carry the task out on the machine. ChatGPT Voice with computer use already pairs speech with computer control, and Claude is the typed-assistant comparison. This repository is the shared workspace for one continuous spoken desktop session over a short build. The orchestrator is still a planner loop; it does not yet run the spoken script. The audio package turns fixture clips (or a microphone) into end-of-utterance transcripts. The action package can click, type, focus, and open the demo apps. The vision package publishes screen frames and grounds the demo script through a fixture attention model.
+BhashaFlow is a hackathon project for a voice-first desktop demo. You speak a task, and three tracks — vision, audio, and action — are coordinated by an orchestrator so the demo can listen, look at the screen, and carry the task out on the machine. ChatGPT Voice with computer use already pairs speech with computer control, and Claude is the typed-assistant comparison. This repository is the shared workspace for one continuous spoken desktop session over a short build. The audio package turns fixture clips (or a microphone) into end-of-utterance transcripts. The action package can click, type, focus, and open the demo apps. The orchestrator runs that path as one spoken script. The vision package publishes screen frames and grounds the demo script through a fixture attention model.
 
 ## Stack
 
@@ -26,7 +26,13 @@ The root project is a uv workspace (`tool.uv.package = false`) that depends on `
 
 ## Run locally
 
-Install uv 0.13.5, then sync the workspace. Tests are the runnable surface until a demo entrypoint exists. The audio fixture path prints the four demo lines with no API key:
+Install uv 0.13.5, then sync the workspace. The spoken demo runs in fixture mode with no API key:
+
+```bash
+uv run bhashaflow-demo
+```
+
+That plays wake, the four demo lines, and stop, and prints the stage log (`listen`, `ground`, `act`, `confirm`, `next`). The audio fixture path prints the four lines on their own:
 
 ```bash
 uv run python -m bhashaflow_audio
@@ -86,7 +92,9 @@ ChatGPT Voice with computer use is the comparison for this script. Its observe s
 
 ### Planner loop
 
-`PlannerLoop` in `bhashaflow-orchestrator` grounds one utterance, maps it to a click or type target, and re-grounds once when vision returns a recoverable miss and the utterance has a sharper clause. The model, the prompt (including the 40-token tail truncation), and the latency assumptions are in [docs/planner-loop.md](docs/planner-loop.md). CI runs the fixture heuristic. `BHASHAFLOW_VISION_ENDPOINT` selects an HTTP model when it is an http(s) URL; leave it empty for local and CI runs. The loop does not send OS input.
+`PlannerLoop` in `bhashaflow-orchestrator` grounds one utterance, maps it to a click or type target, and re-grounds once when vision returns a recoverable miss and the utterance has a sharper clause. The model, the prompt (including the 40-token tail truncation), and the latency assumptions are in [docs/planner-loop.md](docs/planner-loop.md). CI runs the fixture heuristic. `BHASHAFLOW_VISION_ENDPOINT` selects an HTTP model when it is an http(s) URL; leave it empty for local and CI runs. `BHASHAFLOW_PLANNER=muse` is a separate opt-in that asks `muse-spark-1.3` to name one element (`reasoning_effort` `low`). The demo loop does not send OS input unless `BHASHAFLOW_ACTIONS=desktop`.
+
+`uv run bhashaflow-demo` is the state machine around that planner: listen → ground → act → confirm → next. The stage log is the debug output. See [docs/orchestration.md](docs/orchestration.md). Optional region boxes from `sam-3.1` stay off unless `BHASHAFLOW_SAM=1` and a key are both set; the fixture overlay keeps the accessibility box.
 
 ### Planner use
 
