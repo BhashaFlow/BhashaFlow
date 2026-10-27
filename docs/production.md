@@ -14,6 +14,18 @@ uv run bhashaflow
 
 `bhashaflow` and `bhashaflow-demo --live` load `.env` from the working directory, or the file in `BHASHAFLOW_ENV_FILE`. Variables already exported win. The rehearsal commands do not load `.env`.
 
+## Secrets
+
+Keys stay in the shell or in a local `.env`. Copy `.env.example` and put the real value in `MODEL_API_KEY` there. `BHASHAFLOW_MUSE_API_KEY`, `BHASHAFLOW_STT_API_KEY`, and `BHASHAFLOW_TTS_API_KEY` are the other names the process accepts. `.env` is gitignored. `.env.example` stays in git with those fields empty.
+
+Do not commit key values, private keys, or other secret files. The **Lint and test** job runs gitleaks and fails the pull request when a key shows up in tracked files or in git history. Run the same check before you push:
+
+```bash
+uv run python scripts/scan_secrets.py
+```
+
+`make scan-secrets` is the same command. `pre-commit install` also runs gitleaks on staged changes. The scan reads this branch's git history, changes to tracked files, and new files that are not gitignored. Gitignored files, including a local `.env`, stay out of the scan.
+
 ## What a person can do
 
 With `MODEL_API_KEY` (or `BHASHAFLOW_MUSE_API_KEY` or `BHASHAFLOW_STT_API_KEY`), a microphone, screen recording, and an input helper:

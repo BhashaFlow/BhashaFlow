@@ -2,6 +2,7 @@
 
 import json
 import platform
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -519,7 +520,50 @@ def test_production_doc_states_the_live_path_and_the_gaps() -> None:
         "Accessibility",
         "Ctrl-C",
         "BHASHAFLOW_ACTIONS",
+        "gitleaks",
+        "scripts/scan_secrets.py",
+        "Do not commit key values",
     ):
         assert phrase in text
     assert "uv run bhashaflow" in readme
     assert "docs/production.md" in readme
+    assert "scripts/scan_secrets.py" in readme
+
+
+def test_secret_paths_are_ignored_and_the_example_is_tracked() -> None:
+    root = Path(__file__).resolve().parents[3]
+    ignored = [
+        ".env",
+        ".env.local",
+        "production.env",
+        ".envrc",
+        "keys/id_rsa",
+        "cert.pem",
+        "credentials.json",
+        ".netrc",
+    ]
+    for relative in ignored:
+        completed = subprocess.run(
+            ["git", "check-ignore", "--", relative],
+            cwd=root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert completed.returncode == 0, relative
+    example = subprocess.run(
+        ["git", "check-ignore", "--", ".env.example"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert example.returncode != 0
+    tracked = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", ".env.example"],
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert tracked.returncode == 0

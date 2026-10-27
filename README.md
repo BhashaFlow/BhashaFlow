@@ -67,10 +67,13 @@ The GitHub Actions job [`.github/workflows/ci.yml`](.github/workflows/ci.yml) ru
 ```bash
 uv python install 3.12
 uv sync --frozen --all-packages
+uv run python scripts/scan_secrets.py
 uv run ruff check .
 uv run ruff format --check .
 uv run pytest
 ```
+
+`scripts/scan_secrets.py` is the gitleaks step inside **Lint and test**. It fails if a Muse key or another secret is in tracked files or in git history. The policy is in [docs/production.md](docs/production.md).
 
 `uv sync --frozen` fails if `uv.lock` is out of date. After changing dependencies, run `uv lock` and commit the lockfile.
 
