@@ -71,7 +71,7 @@ class VoiceControl:
         result = VoiceRun()
         self._publish(result, "idle", "idle", "")
         for segment in self._pipeline.run(source):
-            kind = _classify(segment.transcript, armed=self._armed)
+            kind = classify_utterance(segment.transcript, armed=self._armed)
             if kind == "wake":
                 self._armed = True
                 result.woke = True
@@ -127,7 +127,8 @@ def run_spoken_demo() -> VoiceRun:
     return VoiceControl(StatusSynthesizer()).run(FixtureSource(voice_script_clips()))
 
 
-def _classify(text: str, *, armed: bool) -> str:
+def classify_utterance(text: str, *, armed: bool) -> str:
+    """``wake``, ``stop``, ``command``, or ``ignore``. Commands require a wake first."""
     folded = text.casefold().strip()
     if folded in _STOP:
         return "stop"

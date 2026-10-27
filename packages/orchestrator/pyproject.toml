@@ -1,7 +1,7 @@
 [project]
 name = "bhashaflow-orchestrator"
-version = "0.2.0"
-description = "Planner loop for BhashaFlow vision, audio, and action."
+version = "0.3.0"
+description = "Spoken demo loop for BhashaFlow vision, audio, and action."
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "bhashaflow-action",
@@ -15,6 +15,9 @@ bhashaflow-action = { workspace = true }
 bhashaflow-audio = { workspace = true }
 bhashaflow-shared = { workspace = true }
 bhashaflow-vision = { workspace = true }
+
+[project.scripts]
+bhashaflow-demo = "bhashaflow_orchestrator.cli:main"
 
 [build-system]
 requires = ["hatchling"]

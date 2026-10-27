@@ -1,24 +1,27 @@
-"""Coordinates vision, audio, and action for one spoken step.
+"""Coordinates vision, audio, and action.
 
-``PlannerLoop`` grounds an utterance and hands the action track a click or
-type target. It does not send OS input. Audio is still a placeholder.
+``PlannerLoop`` grounds one utterance. ``DemoLoop`` runs the spoken script:
+listen, ground, act, confirm, next. The fixture path does not send OS input.
 """
 
 from bhashaflow_action import TRACK as ACTION_TRACK
 from bhashaflow_audio import TRACK as AUDIO_TRACK
+from bhashaflow_orchestrator.demo import DemoLoop, open_demo
 from bhashaflow_orchestrator.loop import PlannerLoop, PlanStep, open_planner
 from bhashaflow_shared import TRACKS
 from bhashaflow_vision import TRACK as VISION_TRACK
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 TRACK = "orchestrator"
 
 __all__ = [
     "TRACK",
+    "DemoLoop",
     "PlanStep",
     "PlannerLoop",
     "coordinated_tracks",
+    "open_demo",
     "open_planner",
     "registered",
 ]
