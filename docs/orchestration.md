@@ -8,7 +8,7 @@ One process runs the canonical script by voice. The state machine is listen → 
 uv run bhashaflow-demo
 ```
 
-That plays wake (`bhashaflow start`), the four demo lines, and `stop`. It does not read the keyboard. The stage log goes to stdout. `ok=true` and `steps=4` on the `phase=done` line means the script finished.
+That plays wake (`bhashaflow start`), the four demo lines, and `stop`. It does not read the keyboard. The stage log goes to stdout. The default run includes one rehearsed click miss, so `phase=done` shows `steps=4`, `recoveries=1`, and `ok=true`. `--no-recover` is the clean script. The permissions, warm-up, and checklist are in [demo-runbook.md](demo-runbook.md).
 
 `--planner muse` switches grounding to `muse-spark-1.3` and exits with status 2 when no Model API key is set. The default planner is the fixture heuristic, even if a key happens to be in the environment. `BHASHAFLOW_PLANNER=muse` is the same opt-in for `planner_attention_from_env()`.
 
