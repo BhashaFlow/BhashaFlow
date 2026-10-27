@@ -37,14 +37,18 @@ dev = [
 
 [[package]]
 name = "bhashaflow-action"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "packages/action" }
 dependencies = [
     { name = "bhashaflow-shared" },
+    { name = "bhashaflow-vision" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "bhashaflow-shared", editable = "packages/shared" }]
+requires-dist = [
+    { name = "bhashaflow-shared", editable = "packages/shared" },
+    { name = "bhashaflow-vision", editable = "packages/vision" },
+]
 
 [[package]]
 name = "bhashaflow-audio"
@@ -83,7 +87,7 @@ source = { editable = "packages/shared" }
 
 [[package]]
 name = "bhashaflow-vision"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "packages/vision" }
 dependencies = [
     { name = "bhashaflow-shared" },

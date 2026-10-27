@@ -11,7 +11,7 @@ from bhashaflow_vision.capture import CaptureUnavailable, desktop_capture_status
 from bhashaflow_vision.session import VisionSession, open_session
 from bhashaflow_vision.types import GroundingEvent, GroundingResult, GroundingStatus
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 TRACK = "vision"
 
