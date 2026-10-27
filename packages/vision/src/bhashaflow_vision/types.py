@@ -1,8 +1,8 @@
 """Structured screen and grounding values for the planner and the action engine.
 
 Bounding boxes are pixel coordinates in the frame that produced them, origin at the
-top-left. This package does not click or type. The action track maps a grounded
-target onto an OS event.
+top-left. Pointer mapping lives in ``bhashaflow_vision.pointer``. This package does
+not send OS input.
 """
 
 from dataclasses import dataclass
@@ -36,6 +36,9 @@ class BoundingBox:
 
     def inside(self, width: int, height: int) -> bool:
         return self.x + self.width <= width and self.y + self.height <= height
+
+    def contains(self, x: int, y: int) -> bool:
+        return self.x <= x < self.x + self.width and self.y <= y < self.y + self.height
 
 
 @dataclass(frozen=True)
