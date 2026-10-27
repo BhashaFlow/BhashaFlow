@@ -1,0 +1,69 @@
+title = "BhashaFlow secret scan"
+minVersion = "8.30.1"
+
+[extend]
+useDefault = true
+
+# Same-line assignments: KEY=value, KEY="value", "KEY": "value", export KEY=value.
+# Comma-separated names such as ("MODEL_API_KEY", "BHASHAFLOW_MUSE_API_KEY") are a
+# different shape and are covered by the call rules below.
+[[rules]]
+id = "bhashaflow-assigned-api-key"
+description = "Muse or BhashaFlow API key assigned a non-placeholder value"
+regex = '''(?i)["']?(?:MODEL_API_KEY|BHASHAFLOW_MUSE_API_KEY|BHASHAFLOW_STT_API_KEY|BHASHAFLOW_TTS_API_KEY)["']?[ \t]*[=:][ \t]*["']?([A-Za-z0-9+/=_\-.]{20,})'''
+secretGroup = 1
+entropy = 3.5
+keywords = [
+  "model_api_key",
+  "bhashaflow_muse_api_key",
+  "bhashaflow_stt_api_key",
+  "bhashaflow_tts_api_key",
+]
+
+  [[rules.allowlists]]
+  description = "The variable name was captured, not a value"
+  regexTarget = "secret"
+  regexes = ['''(?i)^(MODEL_API_KEY|BHASHAFLOW_[A-Z0-9_]+)$''']
+
+[[rules]]
+id = "bhashaflow-sk-api-key"
+description = "sk- key assigned to a Muse or BhashaFlow variable"
+regex = '''(?i)["']?(?:MODEL_API_KEY|BHASHAFLOW_MUSE_API_KEY|BHASHAFLOW_STT_API_KEY|BHASHAFLOW_TTS_API_KEY)["']?[ \t]*[=:][ \t]*["']?(sk-[A-Za-z0-9_\-]{8,})'''
+secretGroup = 1
+keywords = [
+  "model_api_key",
+  "bhashaflow_muse_api_key",
+  "bhashaflow_stt_api_key",
+  "bhashaflow_tts_api_key",
+]
+
+# Quoted arguments: setenv("MODEL_API_KEY", "value") and similar calls.
+[[rules]]
+id = "bhashaflow-call-api-key"
+description = "Muse or BhashaFlow API key passed as a quoted argument"
+regex = '''(?i)["'](?:MODEL_API_KEY|BHASHAFLOW_MUSE_API_KEY|BHASHAFLOW_STT_API_KEY|BHASHAFLOW_TTS_API_KEY)["'][ \t]*,[ \t]*["']([A-Za-z0-9+/=_\-.]{20,})["']'''
+secretGroup = 1
+entropy = 3.5
+keywords = [
+  "model_api_key",
+  "bhashaflow_muse_api_key",
+  "bhashaflow_stt_api_key",
+  "bhashaflow_tts_api_key",
+]
+
+  [[rules.allowlists]]
+  description = "The variable name was captured, not a value"
+  regexTarget = "secret"
+  regexes = ['''(?i)^(MODEL_API_KEY|BHASHAFLOW_[A-Z0-9_]+)$''']
+
+[[rules]]
+id = "bhashaflow-call-sk-key"
+description = "sk- key passed as a quoted argument"
+regex = '''(?i)["'](?:MODEL_API_KEY|BHASHAFLOW_MUSE_API_KEY|BHASHAFLOW_STT_API_KEY|BHASHAFLOW_TTS_API_KEY)["'][ \t]*,[ \t]*["'](sk-[A-Za-z0-9_\-]{8,})["']'''
+secretGroup = 1
+keywords = [
+  "model_api_key",
+  "bhashaflow_muse_api_key",
+  "bhashaflow_stt_api_key",
+  "bhashaflow_tts_api_key",
+]
