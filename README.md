@@ -56,13 +56,17 @@ uv run pytest
 
 `bhashaflow-vision` keeps a near-continuous frame available for a planner and grounds one intent onto a single UI element (bounding box, accessibility hint, and confidence). CI uses `BHASHAFLOW_CAPTURE=fixture`, which replays Downloads → PDF or sheet → mail with no desktop. `BHASHAFLOW_CAPTURE=desktop` grabs the primary monitor through [mss](https://github.com/BoboTiG/python-mss) and needs screen-recording permission on the demo machine. Tests probe that adapter and accept a missing monitor, so Linux CI does not need a display.
 
-`FixtureAttention` scores the accessibility snapshot on the current fixture frame. That is the stand-in for a live attention model: implement `AttentionModel` and pass it to `VisionSession` when pixel grounding is ready. Until then, a desktop frame with no elements returns `low_confidence` and `recoverable=True`, which is the signal orchestration uses to retry once. This package does not send OS input or draw an overlay. `VisionSession.overlay_payload()` is the debug hook the overlay can read (last status, target, candidates, and timing).
+`FixtureAttention` scores the accessibility snapshot on the current fixture frame. That is the stand-in for a live attention model: implement `AttentionModel` and pass it to `VisionSession` when pixel grounding is ready. Until then, a desktop frame with no elements returns `low_confidence` and `recoverable=True`, which is the signal orchestration uses to retry once. This package does not send OS input. `VisionSession.overlay_payload()` is the debug hook the stage overlay reads (last status, target, candidates, and timing). `GroundingOverlay` turns that payload into draw instructions. It does not open a window, so CI can check placement without a display.
 
 ### Click and type targets
 
 `FocusSession.consume(event)` maps a grounded event to a `PointerTarget`. The action package re-exports that type from `bhashaflow_action` so the action engine has one import. A click target is the center of the bounding box plus a stable accessibility id, `{app}:{accessibility_hint}`. Text fields (`textbox` and similar roles) are type targets at that same point. The id does not include the frame number, so the same control stays the same target across frames.
 
 Low-confidence events copy `recoverable` and `reason` from vision and set no point. `FocusSession` treats the app on the frame as window focus. The first app is not a change. A later frame from another app sets `focus_changed` (Files to Preview or Sheets, then Mail). Staying inside Files does not.
+
+### Stage overlay
+
+`GroundingOverlay.render(session.overlay_payload())` builds a side panel for the projector: the app, the selected element in 36 px accent type, and `CLICK` or `TYPE` in 28 px. Colors are light or amber on `#0E1116`. The panel prefers the right edge and moves to the left if that would cover the target. The element is marked with four bars outside its box, so the click point is not painted. `toggle()` or `BHASHAFLOW_OVERLAY=0` clears the instructions for debugging. A low-confidence payload shows that status and whether it is recoverable, and draws no target.
 
 ### Latency budget
 
@@ -114,6 +118,7 @@ Placeholders live in [`.env.example`](.env.example):
 
 - `BHASHAFLOW_LOG_LEVEL` — future process log level (`info` by default)
 - `BHASHAFLOW_CAPTURE` — `fixture` (default) or `desktop`
+- `BHASHAFLOW_OVERLAY` — `1` (default) draws the side panel, `0` hides it
 - `BHASHAFLOW_STT_API_KEY` and `BHASHAFLOW_TTS_API_KEY` — audio track
 - `BHASHAFLOW_VISION_ENDPOINT` — reserved for a future attention model; unused
 

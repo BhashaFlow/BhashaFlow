@@ -87,7 +87,7 @@ source = { editable = "packages/shared" }
 
 [[package]]
 name = "bhashaflow-vision"
-version = "0.3.0"
+version = "0.4.0"
 source = { editable = "packages/vision" }
 dependencies = [
     { name = "bhashaflow-shared" },
