@@ -15,7 +15,7 @@ from bhashaflow_audio.budget import (
 from bhashaflow_audio.pipeline import AudioPipeline, transcribe_fixture, transcriber_from_env
 from bhashaflow_shared import TRACKS
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 TRACK = "audio"
 

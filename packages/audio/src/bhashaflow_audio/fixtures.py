@@ -20,6 +20,20 @@ CANONICAL_UTTERANCES = (
 WAKE_UTTERANCE = "bhashaflow start"
 STOP_UTTERANCE = "stop"
 
+# Spoken session controls. Included in the fixture catalog so wake and stop
+# survive VAD as real utterances instead of being dropped as unknown audio.
+CONTROL_UTTERANCES = (
+    WAKE_UTTERANCE,
+    "bhashaflow",
+    "start",
+    "start listening",
+    STOP_UTTERANCE,
+    "abort",
+    "cancel",
+    "bhashaflow stop",
+    "stop listening",
+)
+
 
 class Clip:
     """One spoken line: loud frames, then enough silence to endpoint."""
