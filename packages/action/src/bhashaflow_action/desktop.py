@@ -7,6 +7,7 @@ returned before the runner is called.
 
 import os
 import platform
+import shutil
 import subprocess
 from collections.abc import Callable
 
@@ -129,10 +130,16 @@ def _click_argv(x: int, y: int) -> list[str]:
         script = f'tell application "System Events" to click at {{{x}, {y}}}'
         return ["osascript", "-e", script]
     if platform.system() == "Windows":
-        # Best-effort cursor move. A full click needs a UI Automation helper.
         command = (
-            "Add-Type -AssemblyName System.Windows.Forms; "
-            f"[System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point({x}, {y})"
+            "if (-not ('BhashaFlow.BhashaInput' -as [type])) { "
+            "Add-Type -MemberDefinition '"
+            '[DllImport("user32.dll")] public static extern bool SetCursorPos(int X, int Y); '
+            '[DllImport("user32.dll")] public static extern void mouse_event('
+            "uint dwFlags, uint dx, uint dy, uint dwData, int dwExtraInfo);' "
+            "-Name BhashaInput -Namespace BhashaFlow | Out-Null }; "
+            f"[BhashaFlow.BhashaInput]::SetCursorPos({int(x)}, {int(y)}); "
+            "[BhashaFlow.BhashaInput]::mouse_event(2,0,0,0,0); "
+            "[BhashaFlow.BhashaInput]::mouse_event(4,0,0,0,0)"
         )
         return ["powershell", "-NoProfile", "-Command", command]
     return ["xdotool", "mousemove", str(x), str(y), "click", "1"]
@@ -140,13 +147,75 @@ def _click_argv(x: int, y: int) -> list[str]:
 
 def _type_argv(text: str) -> list[str]:
     if platform.system() == "Darwin":
-        script = f'tell application "System Events" to keystroke "{text}"'
+        safe = text.replace("\\", "\\\\").replace('"', '\\"')
+        script = f'tell application "System Events" to keystroke "{safe}"'
         return ["osascript", "-e", script]
     if platform.system() == "Windows":
-        return ["powershell", "-NoProfile", "-Command", "Write-Output skipped"]
+        command = (
+            "Add-Type -AssemblyName System.Windows.Forms; "
+            "[System.Windows.Forms.SendKeys]::SendWait(" + _powershell_single(_sendkeys(text)) + ")"
+        )
+        return ["powershell", "-NoProfile", "-Command", command]
     return ["xdotool", "type", "--", text]
 
 
+def _sendkeys(text: str) -> str:
+    specials = set("+^%~{}()")
+    return "".join("{" + char + "}" if char in specials else char for char in text)
+
+
+def _powershell_single(text: str) -> str:
+    return "'" + text.replace("'", "''") + "'"
+
+
+def action_runtime_status() -> tuple[bool, str]:
+    """Check that the OS helper exists. This does not click or grant permission."""
+    system = platform.system()
+    if system == "Linux":
+        missing = [name for name in ("xdotool", "xdg-open") if shutil.which(name) is None]
+        if missing:
+            needed = " and ".join(missing)
+            return False, (
+                f"Linux desktop actions need {needed} on PATH. Install them and grant "
+                "input access (AT-SPI or X11). This check does not click; a missing "
+                "permission shows up as a failed action, which is retried once."
+            )
+        return True, (
+            "xdotool and xdg-open are on PATH. Input permission is not proven until "
+            "the first click."
+        )
+    if system == "Darwin":
+        if shutil.which("osascript") is None:
+            return False, (
+                "macOS desktop actions need osascript. Grant Accessibility to the "
+                "process that runs bhashaflow."
+            )
+        return True, (
+            "osascript is on PATH. Grant Accessibility in System Settings. This probe "
+            "does not click."
+        )
+    if system == "Windows":
+        if shutil.which("powershell") is None:
+            return False, (
+                "Windows desktop actions need powershell. Allow this process to inject input."
+            )
+        return True, ("powershell is on PATH. Allow UI input. This probe does not click.")
+    return False, (
+        f"Desktop actions are not implemented for {system}. "
+        "Use uv run bhashaflow-demo for the fixture rehearsal."
+    )
+
+
 def _subprocess_runner(argv: list[str]) -> int:
-    completed = subprocess.run(argv, check=False, capture_output=True)
+    try:
+        completed = subprocess.run(
+            argv,
+            check=False,
+            capture_output=True,
+            timeout=15,
+        )
+    except subprocess.TimeoutExpired:
+        return 124
+    except FileNotFoundError:
+        return 127
     return completed.returncode

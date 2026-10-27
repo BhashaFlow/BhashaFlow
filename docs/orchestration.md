@@ -10,6 +10,8 @@ uv run bhashaflow-demo
 
 That plays wake (`bhashaflow start`), the four demo lines, and `stop`. It does not read the keyboard. The stage log goes to stdout. The default run includes one rehearsed click miss, so `phase=done` shows `steps=4`, `recoveries=1`, and `ok=true`. `--no-recover` is the clean script. The permissions, warm-up, and checklist are in [demo-runbook.md](demo-runbook.md).
 
+`uv run bhashaflow` and `uv run bhashaflow-demo --live` are the single-user path: microphone, `muse-voice-transcribe-1.0`, `muse-spark-1.3`, and allowlisted desktop actions. They exit 2 when the key or an OS helper is missing, and they do not substitute this fixture loop. Operator steps are in [production.md](production.md).
+
 `--planner muse` switches grounding to `muse-spark-1.3` and exits with status 2 when no Model API key is set. The default planner is the fixture heuristic, even if a key happens to be in the environment. `BHASHAFLOW_PLANNER=muse` is the same opt-in for `planner_attention_from_env()`.
 
 ## State machine

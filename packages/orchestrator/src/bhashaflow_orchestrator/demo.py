@@ -17,6 +17,8 @@ from bhashaflow_audio.tts import SpeechSynthesis, StatusSynthesizer
 from bhashaflow_audio.types import SpeechSegment
 from bhashaflow_orchestrator.log import StageLog
 from bhashaflow_orchestrator.loop import PlannerLoop, PlanStep
+from bhashaflow_orchestrator.muse_planner import MusePlannerError
+from bhashaflow_orchestrator.textutil import typed_text_from_utterance
 from bhashaflow_vision import CaptureUnavailable
 from bhashaflow_vision.session import VisionSession
 
@@ -53,6 +55,7 @@ class DemoLoop:
         *,
         scenes: tuple[str, ...] = SCRIPT_SCENES,
         log: StageLog | None = None,
+        require_script: bool = True,
     ) -> None:
         self._planner = planner
         self._actions = actions
@@ -60,6 +63,7 @@ class DemoLoop:
         self._tts = tts
         self._scenes = scenes
         self.log = StageLog() if log is None else log
+        self._require_script = require_script
 
     @classmethod
     def for_fixture(
@@ -97,12 +101,15 @@ class DemoLoop:
             )
         if not stopped:
             self._consume(self._pipeline.flush(), report, armed, index)
-        report.ok = (
-            report.woke
-            and report.stopped
-            and report.commands == list(CANONICAL_UTTERANCES)
-            and report.failures == 0
-        )
+        if self._require_script:
+            report.ok = (
+                report.woke
+                and report.stopped
+                and report.commands == list(CANONICAL_UTTERANCES)
+                and report.failures == 0
+            )
+        else:
+            report.ok = report.woke and report.stopped and report.failures == 0
         self.log.event(
             phase="done",
             steps=len(report.commands),
@@ -121,6 +128,13 @@ class DemoLoop:
         stopped = False
         for segment in segments:
             if not segment.transcript:
+                if segment.error and segment.model != "fixture":
+                    self.log.event(
+                        phase="listen",
+                        indicator="listening" if armed else "idle",
+                        error=segment.error,
+                        model=segment.model,
+                    )
                 continue
             armed, index, stopped = self._utterance(segment, report, armed, index)
             if stopped:
@@ -154,7 +168,19 @@ class DemoLoop:
             return armed, index, False
         report.commands.append(segment.transcript)
         self._show(index)
-        step = self._planner.step(segment.transcript)
+        try:
+            step = self._planner.step(segment.transcript)
+        except MusePlannerError as exc:
+            self.log.event(
+                phase="ground",
+                indicator="thinking",
+                error=str(exc),
+                model="muse-spark-1.3",
+            )
+            report.failures += 1
+            self._confirm(report, "I could not do that", indicator="confirming")
+            self.log.event(phase="next", indicator="listening")
+            return True, index + 1, False
         target_name = "" if step.handoff.target is None else step.handoff.target.element_name
         self.log.event(
             phase="ground",
@@ -164,7 +190,7 @@ class DemoLoop:
             recovered=step.recovered,
             latency_ms=round(step.latency_ms, 1),
         )
-        result = self._act(step, report, retry=True)
+        result = self._act(step, report, retry=True, utterance=segment.transcript)
         if result.ok:
             self._confirm(report, confirmation_for(segment.transcript), indicator="confirming")
         else:
@@ -173,8 +199,15 @@ class DemoLoop:
         self.log.event(phase="next", indicator="listening")
         return True, index + 1, False
 
-    def _act(self, step: PlanStep, report: DemoReport, *, retry: bool) -> ActionResult:
-        typed = _type_text(step)
+    def _act(
+        self,
+        step: PlanStep,
+        report: DemoReport,
+        *,
+        retry: bool,
+        utterance: str,
+    ) -> ActionResult:
+        typed = self._typed(step, utterance)
         self.log.event(phase="act", indicator="acting", attempt="first")
         results = perform(self._actions, step.handoff, type_text=typed)
         result = results[-1]
@@ -220,12 +253,13 @@ class DemoLoop:
         except CaptureUnavailable:
             self.log.event(phase="ground", scene=self._scenes[index], capture="desktop")
 
-
-def _type_text(step: PlanStep) -> str:
-    target = step.handoff.target
-    if target is not None and target.action == "type":
-        return DEMO_RECIPIENT
-    return ""
+    def _typed(self, step: PlanStep, utterance: str) -> str:
+        target = step.handoff.target
+        if target is None or target.action != "type":
+            return ""
+        if self._require_script:
+            return DEMO_RECIPIENT
+        return typed_text_from_utterance(utterance)
 
 
 def open_demo() -> DemoLoop:

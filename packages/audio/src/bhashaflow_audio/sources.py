@@ -71,3 +71,29 @@ def open_microphone(sample_rate: int = SAMPLE_RATE_HZ) -> MicrophoneSource:
         return captured.tobytes()
 
     return MicrophoneSource(reader, sample_rate=sample_rate)
+
+
+def microphone_status() -> tuple[bool, str]:
+    """Report whether an input device can be queried. Does not start a recording."""
+    try:
+        import sounddevice as sd
+    except ImportError:
+        return False, (
+            "No microphone backend. Install PortAudio and the optional sounddevice "
+            "package (uv pip install sounddevice), then grant microphone permission "
+            "to this process. Live mode will not switch to fixture audio."
+        )
+    try:
+        device = sd.query_devices(kind="input")
+    except Exception as exc:
+        return False, (
+            "No microphone is available ("
+            + str(exc)
+            + "). Grant microphone permission. Live mode will not switch to fixture audio."
+        )
+    name = "input"
+    if isinstance(device, dict):
+        raw = device.get("name", "input")
+        if isinstance(raw, str) and raw.strip():
+            name = raw.strip()
+    return True, f"microphone reported: {name}"

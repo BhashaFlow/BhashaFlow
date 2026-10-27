@@ -17,6 +17,7 @@ bhashaflow-shared = { workspace = true }
 bhashaflow-vision = { workspace = true }
 
 [project.scripts]
+bhashaflow = "bhashaflow_orchestrator.live:main"
 bhashaflow-demo = "bhashaflow_orchestrator.cli:main"
 
 [build-system]

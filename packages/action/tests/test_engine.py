@@ -123,3 +123,33 @@ def test_desktop_runner_is_allowlisted_and_off_by_default(monkeypatch: pytest.Mo
     assert isinstance(selected, DesktopActionEngine)
     monkeypatch.setenv("BHASHAFLOW_ACTIONS", "yolo")
     assert isinstance(actions_from_env(runner), FixtureActionEngine)
+
+
+def test_windows_click_and_type_inject_input(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(platform, "system", lambda: "Windows")
+    calls: list[list[str]] = []
+
+    def runner(argv: list[str]) -> int:
+        calls.append(argv)
+        return 0
+
+    desktop = DesktopActionEngine(runner)
+    session = VisionSession.for_demo_script()
+    session.show("mail")
+    session.tick()
+    handoff = FocusSession().consume(session.ground("attach the file"))
+    assert handoff.target is not None
+    clicked = desktop.click(handoff.target)
+    assert clicked.ok is True
+    command = " ".join(calls[-1])
+    assert "SetCursorPos" in command
+    assert "mouse_event" in command
+    assert str(handoff.target.x) in command
+    assert str(handoff.target.y) in command
+    assert "skipped" not in command.casefold()
+    typed = desktop.type_text(handoff.target, "a+b")
+    assert typed.ok is True
+    typed_command = " ".join(calls[-1])
+    assert "SendWait" in typed_command
+    assert "{+}" in typed_command
+    assert "skipped" not in typed_command.casefold()

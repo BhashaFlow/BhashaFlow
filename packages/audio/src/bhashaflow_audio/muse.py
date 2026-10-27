@@ -20,6 +20,7 @@ from typing import Protocol
 
 from bhashaflow_audio.pcm import pcm_to_wav
 from bhashaflow_audio.types import Transcript
+from bhashaflow_shared.retry import call_with_retries
 
 MUSE_ASR_MODEL = "muse-voice-transcribe-1.0"
 MUSE_BASE_URL = "https://api.meta.ai/v1"
@@ -85,11 +86,15 @@ class MuseFileTranscriber:
         transport: Transport | None = None,
         url: str = MUSE_TRANSCRIBE_URL,
         timeout_s: float = 10.0,
+        retries: int = 2,
+        sleep: Callable[[int], None] | None = None,
     ) -> None:
         self._api_key = api_key
         self._transport = _urllib_transport if transport is None else transport
         self._url = url
         self._timeout_s = timeout_s
+        self._retries = retries
+        self._sleep = sleep
 
     def transcribe(self, audio: bytes, sample_rate: int) -> Transcript:
         """Post ``audio`` and return the transcript. Transport errors are empty text."""
@@ -102,7 +107,11 @@ class MuseFileTranscriber:
                 "accept": "application/json",
                 "content-type": content_type,
             }
-            parsed = self._transport(self._url, body, headers, self._timeout_s)
+
+            def attempt() -> dict[str, object]:
+                return self._transport(self._url, body, headers, self._timeout_s)
+
+            parsed = call_with_retries(attempt, retries=self._retries, sleep=self._sleep)
         except Exception as exc:
             return Transcript(
                 text="",

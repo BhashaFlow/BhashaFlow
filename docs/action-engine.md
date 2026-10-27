@@ -38,7 +38,7 @@ The PDF path drives Files, Preview, and Mail. That is more than the two apps the
 | --- | --- | --- |
 | macOS | `open -a` with Finder, Preview, Numbers, or Mail | System Events via `osascript`. Needs Accessibility |
 | Linux | `xdg-open` best effort | `xdotool` best effort. Needs an input interface such as AT-SPI or X11 |
-| Windows | `start` | A cursor move via UI Automation's host process. Needs UI Automation |
+| Windows | `start` | A real click via `SetCursorPos` and `mouse_event`, and typing via `SendKeys`. Needs permission to inject input |
 
 Grant Accessibility (macOS), UI Automation (Windows), or the input portal (Linux) only to the demo process. Do not grant them to a shell that is only running tests. Fixture mode needs none of these.
 

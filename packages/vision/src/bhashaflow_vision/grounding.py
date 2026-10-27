@@ -117,10 +117,14 @@ def event_for(
     frame: ScreenFrame | None,
     candidates: tuple[Candidate, ...],
 ) -> GroundingEvent:
+    app = "" if frame is None else frame.app
+    target = result.target
+    if not app.strip() and target is not None and target.app.strip():
+        app = target.app.strip()
     return GroundingEvent(
         intent=intent,
         scene_id="" if frame is None else frame.scene_id,
-        app="" if frame is None else frame.app,
+        app=app,
         frame_width=0 if frame is None else frame.width,
         frame_height=0 if frame is None else frame.height,
         result=result,

@@ -23,7 +23,7 @@ Native endpointing events:
 | `speechEnd` | End of utterance. Not the transcript |
 | `speechComplete` | The transcript for that `turnId` |
 
-`MuseRealtimeSession` speaks that protocol against any socket with `send_text`, `send_bytes`, and `recv`. It does not import a WebSocket library. File transcription uses the standard library when no transport is injected.
+`MuseRealtimeSession` speaks that protocol against any socket with `send_text`, `send_bytes`, and `recv`. File transcription uses the standard library when no transport is injected. `connect_muse_realtime` opens that socket with `websocket-client` when a live session asks for it. Muse HTTP calls retry transient network errors (`BHASHAFLOW_MUSE_RETRIES`, default 2 extra attempts) and time out (`BHASHAFLOW_MUSE_TIMEOUT_S`). A failed live call is reported. It is not replaced with the fixture catalog.
 
 English is the demo language (`languageBias: English`). The model can recognize other languages; the stage script does not depend on that.
 

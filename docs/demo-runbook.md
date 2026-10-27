@@ -2,6 +2,8 @@
 
 Rehearse the stage script on a laptop with no API key. The default command is fixture audio, fixture vision, and the fixture action engine. It does not read the keyboard, record the screen, or inject input. One click misses on purpose and the loop says `Trying that again`, then completes the script.
 
+The single-user desktop agent is a different command: `uv run bhashaflow` or `uv run bhashaflow-demo --live`. Permissions, the Muse key, abort, and the gaps versus a hosted product are in [production.md](production.md). That command exits with an error when a key or a permission is missing. It does not fall back to this rehearsal. `uv run bhashaflow --fixture` is this same rehearsal, and it is the only way `bhashaflow` uses fixtures.
+
 ## Command
 
 ```bash
@@ -62,7 +64,7 @@ Grant these only to the demo process, and only for the mode you are about to run
 
 ## Environment
 
-Copy `.env.example` to `.env` if you want a checklist. Nothing loads that file automatically. Export the variables you need.
+Copy `.env.example` to `.env` if you want a checklist. This fixture command does not load that file. Export the variables you need. `uv run bhashaflow` does load `.env` and still will not override variables already exported.
 
 | Variable | Empty / default | Set it to |
 | --- | --- | --- |
