@@ -8,10 +8,11 @@ is a separate adapter and is not used in CI.
 from bhashaflow_shared import TRACKS
 from bhashaflow_vision.budget import CAPTURE_INTERVAL_MS, GROUND_BUDGET_MS, VISION_STEP_BUDGET_MS
 from bhashaflow_vision.capture import CaptureUnavailable, desktop_capture_status
+from bhashaflow_vision.overlay import GroundingOverlay, overlay_from_env
 from bhashaflow_vision.session import VisionSession, open_session
 from bhashaflow_vision.types import GroundingEvent, GroundingResult, GroundingStatus
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 TRACK = "vision"
 
@@ -22,11 +23,13 @@ __all__ = [
     "VISION_STEP_BUDGET_MS",
     "CaptureUnavailable",
     "GroundingEvent",
+    "GroundingOverlay",
     "GroundingResult",
     "GroundingStatus",
     "VisionSession",
     "desktop_capture_status",
     "open_session",
+    "overlay_from_env",
     "registered",
 ]
 
