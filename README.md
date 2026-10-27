@@ -1,6 +1,6 @@
 # BhashaFlow
 
-BhashaFlow is a hackathon project for a voice-first desktop demo. You speak a task, and three tracks — vision, audio, and action — are coordinated by an orchestrator so the demo can listen, look at the screen, and carry the task out on the machine. ChatGPT Voice with computer use already pairs speech with computer control, and Claude is the typed-assistant comparison. This repository is the shared workspace for one continuous spoken desktop session over a short build. Audio, action, and the orchestrator are still placeholders. The vision package publishes screen frames and grounds the demo script through a fixture attention model.
+BhashaFlow is a hackathon project for a voice-first desktop demo. You speak a task, and three tracks — vision, audio, and action — are coordinated by an orchestrator so the demo can listen, look at the screen, and carry the task out on the machine. ChatGPT Voice with computer use already pairs speech with computer control, and Claude is the typed-assistant comparison. This repository is the shared workspace for one continuous spoken desktop session over a short build. Action and the orchestrator are still placeholders. The audio package turns fixture clips (or a microphone) into end-of-utterance transcripts. The vision package publishes screen frames and grounds the demo script through a fixture attention model.
 
 ## Stack
 
@@ -26,7 +26,11 @@ The root project is a uv workspace (`tool.uv.package = false`) that depends on `
 
 ## Run locally
 
-Install uv 0.13.5, then sync the workspace. Tests are the runnable surface until a demo entrypoint exists.
+Install uv 0.13.5, then sync the workspace. Tests are the runnable surface until a demo entrypoint exists. The audio fixture path prints the four demo lines with no API key:
+
+```bash
+uv run python -m bhashaflow_audio
+```
 
 ```bash
 curl -LsSf https://astral.sh/uv/0.13.5/install.sh | sh
@@ -108,6 +112,24 @@ session.stop()
 
 `session.show("pdf")` changes the fixture scene. Call `tick` or leave `start` running so the planner sees the new frame.
 
+## Audio
+
+`bhashaflow-audio` segments a stream and transcribes each closed utterance. CI plays tones that stand in for the demo script (`FixtureSource` + `EnergyVad` + `FixtureTranscriber`). A microphone is the same path with a frame reader. `open_microphone()` needs the optional `sounddevice` package and OS microphone permission; CI never calls it.
+
+Live speech-to-text is Muse Voice Transcribe, `muse-voice-transcribe-1.0`. Set `MODEL_API_KEY` (or `BHASHAFLOW_MUSE_API_KEY`, or `BHASHAFLOW_STT_API_KEY`) to post clips to `https://api.meta.ai/v1/asr/transcribe`. The realtime socket is `wss://api.meta.ai/v1/asr/realtime` in `ENDPOINTING` mode, which is the model's own VAD (`speechEnd` closes the utterance, `speechComplete` carries the text). With no key, nothing touches the network.
+
+Muse has no TTS model. Confirmations use `BHASHAFLOW_TTS_BACKEND`: `status` (default, log only), `beep` (local tone), or `command` (optional non-Muse executable via `BHASHAFLOW_TTS_COMMAND`). None of the built-in backends focus a window. Details and the latency table are in [docs/audio-pipeline.md](docs/audio-pipeline.md).
+
+| Slice | Budget |
+| --- | --- |
+| VAD decision | 30 ms |
+| End of utterance (trailing silence) | 400 ms |
+| Fixture transcription, segment already closed | 50 ms |
+| Local confirmation | 150 ms |
+| Barge-in cancel | 100 ms |
+
+Quiet ambient noise stays under the energy gate. Speech during a held confirmation cancels it (barge-in, best effort).
+
 ## OS permissions
 
 Fixture capture, tests, and CI do not record the screen, read the microphone, or inject input. Desktop capture needs screen recording on the demo machine. Clicking and typing are not implemented; the action track will need accessibility access when it lands.
@@ -125,7 +147,10 @@ Placeholders live in [`.env.example`](.env.example):
 - `BHASHAFLOW_LOG_LEVEL` — future process log level (`info` by default)
 - `BHASHAFLOW_CAPTURE` — `fixture` (default) or `desktop`
 - `BHASHAFLOW_OVERLAY` — `1` (default) draws the side panel, `0` hides it
-- `BHASHAFLOW_STT_API_KEY` and `BHASHAFLOW_TTS_API_KEY` — audio track
+- `MODEL_API_KEY`, `BHASHAFLOW_MUSE_API_KEY`, or `BHASHAFLOW_STT_API_KEY` — Muse Voice Transcribe. Empty keeps the fixture transcript catalog.
+- `BHASHAFLOW_TTS_BACKEND` — `status` (default), `beep`, or `command`. Muse has no TTS model.
+- `BHASHAFLOW_TTS_COMMAND` — optional non-Muse executable when the backend is `command`
+- `BHASHAFLOW_TTS_API_KEY` — unused. Kept so older notes still have a name for a future non-Muse TTS key.
 - `BHASHAFLOW_VISION_ENDPOINT` — optional http(s) attention model; empty uses the fixture heuristic
 
 Leave keys empty until the track that reads them exists. Do not commit real credentials.
